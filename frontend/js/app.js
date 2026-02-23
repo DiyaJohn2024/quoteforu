@@ -1,3 +1,4 @@
+const API_BASE = 'https://quoteforunme.onrender.com/';
 // 30 Awesome Quotes
 const quotes = [
     "The only limit to our realization of tomorrow will be our doubts of today.",
@@ -34,7 +35,7 @@ const quotes = [
 
 // Game State
 let completedQuotes = [];
-
+let currentFocusedCard = null;
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     createCards();
@@ -105,7 +106,7 @@ async function openCard(index) {
     // NEW: API save + localStorage fallback
     if (!completedQuotes.includes(index)) {
         try {
-            await fetch(`/api/complete/${index}`, { method: 'POST' });
+            await fetch(`${API_BASE}/api/complete/${index}`, { method: 'POST' });
         } catch(e) {
             console.error('Backend save failed:', e);
         }
@@ -133,7 +134,7 @@ function setupEventListeners() {
     });
     document.getElementById('reset-btn').addEventListener('click', async () => {
         if (confirm('Reset all progress?')) {
-            await fetch('/api/reset', { method: 'POST' });
+            await fetch('${API_BASE}/api/reset', { method: 'POST' });
             createCards();
             updateStats();
         }
@@ -143,7 +144,7 @@ function setupEventListeners() {
 async function updateStats() {
     // NEW: API stats + localStorage fallback
     try {
-        const res = await fetch('/api/stats');
+        const res = await fetch('${API_BASE}/api/stats');
         const stats = await res.json();
         document.getElementById('completed-count').textContent = stats.completed;
         document.getElementById('remaining-count').textContent = stats.remaining;
