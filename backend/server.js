@@ -53,4 +53,10 @@ app.post('/api/reset', (req, res) => {
   });
 });
 
+app.get('/api/progress', (req, res) => {
+    db.all(`SELECT quote_id FROM progress WHERE completed=1`, (err, rows) => {
+        res.json(rows ? rows.map(row => row.quote_id) : []);
+    });
+});
+
 app.listen(3000, () => console.log('🚀 http://localhost:3000'));

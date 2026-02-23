@@ -133,12 +133,23 @@ function setupEventListeners() {
         if (e.target.id === 'overlay') closeCard();
     });
     document.getElementById('reset-btn').addEventListener('click', async () => {
-        if (confirm('Reset all progress?')) {
-            await fetch('${API_BASE}/api/reset', { method: 'POST' });
-            createCards();
-            updateStats();
+    if (confirm('Reset all progress? This cannot be undone!')) {
+        try {
+            // 1. Clear backend
+            await fetch(`${API_BASE}/api/reset`, { method: 'POST' });
+        } catch(e) {
+            console.log('Backend reset failed, clearing local');
         }
-    });
+        
+        // 2. CRITICAL: Clear frontend state
+        completedQuotes = [];
+        localStorage.removeItem('completedQuotes');
+        
+        // 3. Refresh UI
+        createCards();
+        updateStats();
+    }
+});
 }
 
 async function updateStats() {
@@ -148,6 +159,8 @@ async function updateStats() {
         const stats = await res.json();
         document.getElementById('completed-count').textContent = stats.completed;
         document.getElementById('remaining-count').textContent = stats.remaining;
+        const progressRes = await fetch(`${API_BASE}/api/progress`);
+        completedQuotes = await progressRes.json();
     } catch(e) {
         console.log('Using localStorage stats');
         document.getElementById('completed-count').textContent = completedQuotes.length;
